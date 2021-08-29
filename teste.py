@@ -60,17 +60,23 @@ for variante in variantes:
     print(labels)
     print('--------------------------')
 directory = './amostrasGow/'
+batch_size = 32
+img_height = 200
+img_width = 200
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
-  data_dir,
+  directory,
   validation_split=0.2,
   subset="training",
   seed=123,
   image_size=(img_height, img_width),
   batch_size=batch_size)
-print('info:  ')
-print(datajob.info())
-print(datajob.cardinality().numpy())
-
+val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+  directory,
+  validation_split=0.2,
+  subset="validation",
+  seed=123,
+  image_size=(img_height, img_width),
+  batch_size=batch_size)
 model = keras.Sequential([
     keras.layers.Flatten(input_shape=(200, 200)),
     keras.layers.Dense(128, activation='relu'),
