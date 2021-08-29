@@ -22,7 +22,6 @@ import pathlib
 #image manipulation
 from imageio import imread, imwrite
 
-import amostrasGow.coffeSingleDataset as ds
 
 
 #dir is the path to a diretory where images will be processed, the result being output in the same dir
@@ -48,7 +47,7 @@ def procesImage(dir):
 
 
 #Dataset creation section. will do it by now on the fly
-variantes = ['Bica', 'Moca_10_11', '17_18', 'Cata']
+variantes = ['Moca_10_11', '17_18', 'Cata']
 nomes = []
 labels = []
 for variante in variantes:        
@@ -56,9 +55,7 @@ for variante in variantes:
     for arquivo in filesVar:
         nomes.append(arquivo)
         labels.append(variante)
-    print(filesVar)
-    print(labels)
-    print('--------------------------')
+    
 directory = './amostrasGow/'
 batch_size = 32
 img_height = 200
@@ -78,15 +75,28 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
   image_size=(img_height, img_width),
   batch_size=batch_size)
 model = keras.Sequential([
-    keras.layers.Flatten(input_shape=(200, 200)),
+    keras.layers.Flatten(input_shape=(200, 200, 3)),
     keras.layers.Dense(128, activation='relu'),
     keras.layers.Dense(10, activation='softmax')
 ])
+class_names = train_ds.class_names
+AUTOTUNE = tf.data.AUTOTUNE
+
+#train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
+#val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+
 
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
+model.fit(
+  train_ds,
+  validation_data=val_ds,
+  epochs=3
+)
+#test_loss, test_acc = model.evaluate(val_ds,  labels, verbose=2)
 
+#print('\nTest accuracy:', test_acc)
 
 print(labels)
 print(tf.__version__)
