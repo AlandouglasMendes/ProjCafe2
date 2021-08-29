@@ -74,10 +74,24 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
   seed=123,
   image_size=(img_height, img_width),
   batch_size=batch_size)
+num_classes = 3
+for image_batch, labels_batch in train_ds:
+  print(image_batch.shape)
+  print(labels_batch.shape)
+  print(len(val_ds))
+  print('----specific----')
+  break
 model = keras.Sequential([
-    keras.layers.Flatten(input_shape=(200, 200, 3)),
-    keras.layers.Dense(128, activation='relu'),
-    keras.layers.Dense(10, activation='softmax')
+  tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
+  tf.keras.layers.Conv2D(32, 3, activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Conv2D(32, 3, activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Conv2D(32, 3, activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Flatten(),
+  tf.keras.layers.Dense(128, activation='relu'),
+  tf.keras.layers.Dense(num_classes)
 ])
 class_names = train_ds.class_names
 AUTOTUNE = tf.data.AUTOTUNE
@@ -92,12 +106,17 @@ model.compile(optimizer='adam',
 model.fit(
   train_ds,
   validation_data=val_ds,
-  epochs=3
+  epochs=10
 )
 #test_loss, test_acc = model.evaluate(val_ds,  labels, verbose=2)
 
 #print('\nTest accuracy:', test_acc)
 
-print(labels)
+print(class_names)
 print(tf.__version__)
 print(tfds.__version__)
+print(len(val_ds))
+for image_batch, labels_batch in train_ds:
+  print(image_batch.shape)
+  print(labels_batch.shape)
+  break
