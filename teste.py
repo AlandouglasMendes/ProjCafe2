@@ -63,6 +63,7 @@ img_width = 200
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
   directory,
   validation_split=0.2,
+  color_mode="grayscale",
   subset="training",
   seed=123,
   image_size=(img_height, img_width),
@@ -70,6 +71,7 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
   directory,
   validation_split=0.2,
+  color_mode="grayscale",
   subset="validation",
   seed=123,
   image_size=(img_height, img_width),
@@ -81,17 +83,15 @@ for image_batch, labels_batch in train_ds:
   print(len(val_ds))
   print('----specific----')
   break
-model = keras.Sequential([
-  tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
-  tf.keras.layers.Conv2D(32, 3, activation='relu'),
-  tf.keras.layers.MaxPooling2D(),
-  tf.keras.layers.Conv2D(32, 3, activation='relu'),
-  tf.keras.layers.MaxPooling2D(),
-  tf.keras.layers.Conv2D(32, 3, activation='relu'),
-  tf.keras.layers.MaxPooling2D(),
-  tf.keras.layers.Flatten(),
+model = tf.keras.models.Sequential([
+  tf.keras.layers.Flatten(input_shape=(200, 200, 1)),
   tf.keras.layers.Dense(128, activation='relu'),
-  tf.keras.layers.Dense(num_classes)
+  tf.keras.layers.Dense(128, activation='relu'),
+  tf.keras.layers.Dense(128, activation='relu'),
+  tf.keras.layers.Dense(128, activation='relu'),
+
+  tf.keras.layers.Dropout(0.2),
+  tf.keras.layers.Dense(3, activation='softmax')
 ])
 class_names = train_ds.class_names
 AUTOTUNE = tf.data.AUTOTUNE
@@ -116,7 +116,19 @@ print(class_names)
 print(tf.__version__)
 print(tfds.__version__)
 print(len(val_ds))
-for image_batch, labels_batch in train_ds:
-  print(image_batch.shape)
-  print(labels_batch.shape)
-  break
+for classification in class_names:
+  print(classification + ':' +'\n')
+  print(directory + classification)
+  for filename in os.listdir(directory + classification):
+    if filename.endswith('.jpg'):
+      print(filename)
+      imageTest = Image.open(r'./amostrasGow/'+ classification + '/' + filename)
+      imageTest = (np.expand_dims(imageTest,0))
+      print(imageTest.shape)
+      #Predictions
+      prediction = model.predict(imageTest)
+      solution = np.argmax(prediction[0])
+      nomeResult = class_names[solution]
+      print(filename + ': ' + nomeResult)
+    
+
