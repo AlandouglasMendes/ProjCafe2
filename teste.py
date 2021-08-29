@@ -3,9 +3,8 @@ from PIL import Image
 import os
 
 from imageio import imread, imwrite
-#directory e dirpath são caminhs pra pasta onde estão as imagens não processadas
-#as imagens processadas tem 200 x 200 px e ficam na mesma pasta das originais no momento
 
+#R
 def procesImage(dir):
     directory = r'/' + dir + '/'
     dirPath = dir
