@@ -3,6 +3,8 @@ from __future__ import print_function
 from PIL import Image
 import PIL
 
+from datetime import datetime
+
 import keras
 #importing lib numpy
 import numpy as np
@@ -47,6 +49,8 @@ def procesImage(dir):
 
 
 #Dataset creation section. will do it by now on the fly
+nowRaw = datetime.now()
+now = str(nowRaw)
 variantes = ['Moca_10_11', '17_18', 'Cata']
 nomes = []
 labels = []
@@ -83,17 +87,17 @@ for image_batch, labels_batch in train_ds:
   print(len(val_ds))
   print('----specific----')
   break
-model = keras.Sequential([
-  tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
-  tf.keras.layers.Conv2D(32, 3, activation='relu'),
-  tf.keras.layers.MaxPooling2D(),
-  tf.keras.layers.Conv2D(32, 3, activation='relu'),
-  tf.keras.layers.MaxPooling2D(),
-  tf.keras.layers.Conv2D(32, 3, activation='relu'),
-  tf.keras.layers.MaxPooling2D(),
-  tf.keras.layers.Flatten(),
+model = tf.keras.models.Sequential([
+  tf.keras.layers.Flatten(input_shape=(200, 200, 1)),
   tf.keras.layers.Dense(128, activation='relu'),
-  tf.keras.layers.Dense(num_classes)
+  tf.keras.layers.Dense(128, activation='relu'),
+  tf.keras.layers.Flatten(input_shape=(200, 200, 1)),  
+  tf.keras.layers.Dense(128, activation='relu'),
+  tf.keras.layers.Dense(256, activation='relu'),
+  tf.keras.layers.Flatten(input_shape=(200, 200, 1)),
+  tf.keras.layers.Dense(128, activation='relu'),
+  tf.keras.layers.Dropout(0.2),
+  tf.keras.layers.Dense(3, activation='softmax')
 ])
 class_names = train_ds.class_names
 AUTOTUNE = tf.data.AUTOTUNE
@@ -108,7 +112,7 @@ model.compile(optimizer='adam',
 model.fit(
   train_ds,
   validation_data=val_ds,
-  epochs=10
+  epochs=1
 )
 #test_loss, test_acc = model.evaluate(val_ds,  labels, verbose=2)
 
@@ -118,6 +122,8 @@ print(class_names)
 print(tf.__version__)
 print(tfds.__version__)
 print(len(val_ds))
+logstring = [now + "\n"]
+
 for classification in class_names:
   print(classification + ':' +'\n')
   print(directory + classification)
@@ -131,6 +137,15 @@ for classification in class_names:
       prediction = model.predict(imageTest)
       solution = np.argmax(prediction[0])
       nomeResult = class_names[solution]
-      print(filename + ': ' + nomeResult)
+      logstring.append(filename + ': ' + class_names[solution]  + '\n')
+      print(filename + ': ' + class_names[solution]  + '\n')
+menu = input("1 para salvar log, 2 para descartar:\n")
+if menu == "1":
+  logstringJoined = "".join(logstring)
+  nameLog = now + ".txt"
+  f = open(nameLog, "w")
+  f.write(logstringJoined)
+if menu == "2":
+  print("não salvo")      
     
 
