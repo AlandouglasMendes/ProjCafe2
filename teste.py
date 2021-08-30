@@ -83,15 +83,17 @@ for image_batch, labels_batch in train_ds:
   print(len(val_ds))
   print('----specific----')
   break
-model = tf.keras.models.Sequential([
-  tf.keras.layers.Flatten(input_shape=(200, 200, 1)),
+model = keras.Sequential([
+  tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
+  tf.keras.layers.Conv2D(32, 3, activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Conv2D(32, 3, activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Conv2D(32, 3, activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Flatten(),
   tf.keras.layers.Dense(128, activation='relu'),
-  tf.keras.layers.Dense(128, activation='relu'),
-  tf.keras.layers.Dense(128, activation='relu'),
-  tf.keras.layers.Dense(128, activation='relu'),
-
-  tf.keras.layers.Dropout(0.2),
-  tf.keras.layers.Dense(3, activation='softmax')
+  tf.keras.layers.Dense(num_classes)
 ])
 class_names = train_ds.class_names
 AUTOTUNE = tf.data.AUTOTUNE
