@@ -112,7 +112,7 @@ model.compile(optimizer='adam',
 model.fit(
   train_ds,
   validation_data=val_ds,
-  epochs=1
+  epochs=40
 )
 #test_loss, test_acc = model.evaluate(val_ds,  labels, verbose=2)
 
