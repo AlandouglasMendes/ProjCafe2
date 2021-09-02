@@ -84,15 +84,17 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
   image_size=(img_height, img_width),
   batch_size=batch_size)
 num_classes = 3
-for image_batch, labels_batch in train_ds:
-  print(image_batch.shape)
-  print(labels_batch.shape)
-  print(len(val_ds))
-  print('----specific----')
-  break
+
 model = tf.keras.models.Sequential([
   keras.layers.Flatten(input_shape=(200, 200)),
-  keras.layers.Dense(128, activation='relu'),
+  keras.layers.LeakyReLU(alpha=0.1),
+  keras.layers.LeakyReLU(alpha=0.1),
+  keras.layers.Flatten(input_shape=(200, 200)),
+  keras.layers.LeakyReLU(alpha=0.1),
+  keras.layers.LeakyReLU(alpha=0.1),
+  keras.layers.Flatten(input_shape=(200, 200)),
+  keras.layers.LeakyReLU(alpha=0.1),
+  
   keras.layers.Dense(3, activation='softmax')
 ])
 class_names = train_ds.class_names
@@ -106,40 +108,45 @@ model.compile(optimizer='adam',
 model.fit(
   train_ds,
   validation_data=val_ds,
-  epochs=1
+  epochs=20
 )
 
-
-print(class_names)
-print(tf.__version__)
-print(tfds.__version__)
-print(len(val_ds))
-logstring = [now + "\n"]
-
+logstring = ["Dataset treinado em: " + now + "\n"]
+acertos = 0
+total = 0
 for classification in class_names:
-  
   for filename in os.listdir(directory + classification):
     if filename.endswith('.jpg'):
       imageTest = Image.open(r'./amostrasGow/'+ classification + '/' + filename)
-      imageTest = (np.expand_dims(imageTest,0))
-    
-    
+      imageTest = (np.expand_dims(imageTest,0))    
       prediction = model.predict(imageTest)
       solution = np.argmax(prediction[0])
       nomeResult = class_names[solution]
       logstring.append(filename + ': ' + class_names[solution]  + '\n')
-menu = input("1 para salvar log, 2 para descartar:\n")
+      total = total + 1
+      if class_names[solution] == classification:        
+        acertos = acertos + 1
+indiceAcerto = acertos / total
+print('acertos: ' +  str(acertos) + '|||' + 'total: ' + str(total) + '\n')
+print('acertos: ' + str(acertos / total) + '!' + '\n')
+menu = input("1 para salvar modelo/log, 2 para descartar:\n")
+indiceAcertStr = str(indiceAcerto)
+indAcertoDecimal = indiceAcertStr[0:5]
 if menu == "1":
-  os.mkdir(now)
-  save_path = './' + now  
+  os.mkdir('precisao=' + indAcertoDecimal[2:4])
+  save_path = 'precisao=' + indAcertoDecimal[2:4]  
   logstringJoined = "".join(logstring)
   name_of_file = 'log' + now + ".txt"
   completeName = os.path.join(save_path, name_of_file )
   f = open(completeName, "w")
   f.write(logstringJoined)
+  f.write('\n\n\n\n')
+  f.write('-------------------------------------------------------------------------------------------\n')
+  f.write("acertos/erros no conjunto total de imagens:  acertou " + str(acertos) +" de um total de " + str(total) + " imagens, cerca de " + indAcertoDecimal + '\n' + 
+          "por cento.") 
   f.close()
   model.save(save_path)
 if menu == "2":
   print("não salvo")      
     
-
+print(class_names)

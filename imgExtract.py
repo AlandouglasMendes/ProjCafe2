@@ -48,4 +48,3 @@ def procesImage(dir):
             newpicGrey = imwrite(nameGrey, greyScaled, ".jpg")
             idx = counter - 52
             print('img ' + str(idx))
-procesImage("17_18")
